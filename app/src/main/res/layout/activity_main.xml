@@ -6,6 +6,11 @@
     android:layout_height="match_parent"
     tools:context="com.yan.ffmpeg.MainActivity">
 
+    <SurfaceView
+        android:id="@+id/sv"
+        android:layout_width="match_parent"
+        android:layout_height="250dp" />
+
     <TextView
         android:id="@+id/sample_text"
         android:layout_width="wrap_content"
