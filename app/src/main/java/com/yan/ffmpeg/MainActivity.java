@@ -12,30 +12,18 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Surface;
-import android.view.SurfaceView;
 import android.widget.TextView;
 
 import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
-    String[] permissionManifest = {
+    private FFMPEGControl ffmpegControl = new FFMPEGControl();
+    private String[] permissionManifest = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
             , Manifest.permission.READ_EXTERNAL_STORAGE
     };
     private static final int REQUEST_CODE = 0X001;
 
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("avutil");
-        System.loadLibrary("avcodec");
-        System.loadLibrary("avformat");
-        System.loadLibrary("avfilter");
-        System.loadLibrary("avdevice");
-        System.loadLibrary("swscale");
-        System.loadLibrary("swresample");
-        System.loadLibrary("native-lib");
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Example of a call to a native method
         TextView tv = findViewById(R.id.sample_text);
-        tv.setText(configurationInfo());
+        tv.setText(ffmpegControl.configurationInfo());
 
 
         if (Build.VERSION.SDK_INT > 23) {
@@ -64,13 +52,22 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 String inputVideo = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separatorChar + "input.mp4";
                 String output = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separatorChar + "output.yuv";
-                decode(inputVideo, output);
+//                ffmpegControl.decode(inputVideo, output);
 
-                //        SurfaceView surfaceView = findViewById(R.id.sv);
-                //        renderFrame(inputVideo, surfaceView.getHolder().getSurface());
+                String encodeH264Path = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separatorChar + "input.h264";
+                String encodeMp4Path = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separatorChar + "input1.mp4";
+
+                File mp4File = new File(encodeMp4Path);
+                if (mp4File.exists()) {
+                    mp4File.delete();
+                }
+                ffmpegControl.videoEncodeTest(output, encodeH264Path, encodeMp4Path);
+
+                // ffmpeg -i sample.h264 output.mp4
+//                String toMp4 = "ffmpeg -i " + encodeH264Path + " -c:v copy " + encodeMp4Path;
+//                ffmpegControl.ffmpegRun(toMp4.split(" "));
             }
         }.start();
-
     }
 
 
@@ -103,13 +100,5 @@ public class MainActivity extends AppCompatActivity {
         return permission.equals(permissionManifest[0]) || permission.equals(permissionManifest[1]) || super.shouldShowRequestPermissionRationale(permission);
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String configurationInfo();
 
-    public native int renderFrame(String input, Surface surface);
-
-    public native int decode(String input, String output);
 }

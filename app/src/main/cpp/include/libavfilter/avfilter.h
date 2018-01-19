@@ -37,17 +37,17 @@
 
 #include <stddef.h>
 
-#include "libavutil/attributes.h"
-#include "libavutil/avutil.h"
-#include "libavutil/buffer.h"
-#include "libavutil/dict.h"
-#include "libavutil/frame.h"
-#include "libavutil/log.h"
-#include "libavutil/samplefmt.h"
-#include "libavutil/pixfmt.h"
-#include "libavutil/rational.h"
+#include "../libavutil/attributes.h"
+#include "../libavutil/avutil.h"
+#include "../libavutil/buffer.h"
+#include "../libavutil/dict.h"
+#include "../libavutil/frame.h"
+#include "../libavutil/log.h"
+#include "../libavutil/samplefmt.h"
+#include "../libavutil/pixfmt.h"
+#include "../libavutil/rational.h"
 
-#include "libavfilter/version.h"
+#include "../libavfilter/version.h"
 
 /**
  * Return the LIBAVFILTER_VERSION_INT constant.
@@ -195,21 +195,6 @@ typedef struct AVFilter {
      */
 
     /**
-     * Filter pre-initialization function
-     *
-     * This callback will be called immediately after the filter context is
-     * allocated, to allow allocating and initing sub-objects.
-     *
-     * If this callback is not NULL, the uninit callback will be called on
-     * allocation failure.
-     *
-     * @return 0 on success,
-     *         AVERROR code on failure (but the code will be
-     *           dropped and treated as ENOMEM by the calling code)
-     */
-    int (*preinit)(AVFilterContext *ctx);
-
-    /**
      * Filter initialization function.
      *
      * This callback will be called only once during the filter lifetime, after
@@ -282,8 +267,6 @@ typedef struct AVFilter {
     int (*query_formats)(AVFilterContext *);
 
     int priv_size;      ///< size of private data to allocate for the filter
-
-    int flags_internal; ///< Additional flags for avfilter internal use only.
 
     /**
      * Used by the filter registration system. Must not be touched by any other

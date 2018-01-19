@@ -316,12 +316,12 @@
 
 #include <time.h>
 #include <stdio.h>  /* FILE */
-#include "libavcodec/avcodec.h"
-#include "libavutil/dict.h"
-#include "libavutil/log.h"
+#include "../libavcodec/avcodec.h"
+#include "../libavutil/dict.h"
+#include "../libavutil/log.h"
 
 #include "avio.h"
-#include "libavformat/version.h"
+#include "../libavformat/version.h"
 
 struct AVFormatContext;
 
@@ -2954,7 +2954,6 @@ int avformat_match_stream_specifier(AVFormatContext *s, AVStream *st,
 
 int avformat_queue_attached_pictures(AVFormatContext *s);
 
-#if FF_API_OLD_BSF
 /**
  * Apply a list of bitstream filters to a packet.
  *
@@ -2966,6 +2965,7 @@ int avformat_queue_attached_pictures(AVFormatContext *s);
  * @return  >=0 on success;
  *          AVERROR code on failure
  */
+#if FF_API_OLD_BSF
 attribute_deprecated
 int av_apply_bitstream_filters(AVCodecContext *codec, AVPacket *pkt,
                                AVBitStreamFilterContext *bsfc);
