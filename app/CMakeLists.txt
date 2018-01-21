@@ -11,35 +11,22 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 add_library( # Sets the name of the library.
-             native-lib
+             ffmpeg_jni
 
              # Sets the library as a shared library.
              SHARED
 
              # Provides a relative path to your source file(s).
-              src/main/cpp/native-lib.cpp
+               src/main/cpp/ffmpeg_jni.cpp
 
                src/main/cpp/cmdutils.c
-              src/main/cpp/ffmpeg.c
-              src/main/cpp/ffmpeg_filter.c
-              src/main/cpp/ffmpeg_opt.c
+               src/main/cpp/ffmpeg.c
+               src/main/cpp/ffmpeg_filter.c
+               src/main/cpp/ffmpeg_opt.c
+               src/main/cpp/ffmpeg_control.cpp
+                src/main/cpp/syn_queue.cpp
              )
 
-#add_library( # Sets the name of the library.
-#             ffmpeg_control
-#
-#             # Sets the library as a shared library.
-#             SHARED
-#
-#             # Provides a relative path to your source file(s).
-#              src/main/cpp/cmdutils.c
-#              src/main/cpp/ffmpeg.c
-#              src/main/cpp/ffmpeg_filter.c
-#              src/main/cpp/ffmpeg_opt.c
-#
-#              src/main/cpp/threadsafe_queue.cpp
-#              src/main/cpp/ffmpeg_control.cpp
-#             )
 add_library(
             avcodec
             SHARED
@@ -332,7 +319,7 @@ find_library( # Sets the name of the path variable.
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-                       native-lib
+                       ffmpeg_jni
                        fdk-aac
                        avcodec
                        avfilter
