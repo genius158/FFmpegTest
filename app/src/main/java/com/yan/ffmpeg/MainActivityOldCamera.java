@@ -58,7 +58,7 @@ public class MainActivityOldCamera extends AppCompatActivity implements SurfaceH
                     if (mp4file.exists()) {
                         mp4file.delete();
                     }
-                    FFMPEGControl.prepareEncode(basePath, fileName, 1, svWidth, svHeight, svWidth, svHeight, 25, 400000);
+                    FFMPEGControl.prepareEncode(basePath, fileName,  svWidth, svHeight, svWidth, svHeight, 25, 400000);
                     btn.postDelayed(new Runnable() {
                         @Override
                         public void run() {

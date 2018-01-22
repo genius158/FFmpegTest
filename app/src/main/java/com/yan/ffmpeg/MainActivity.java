@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -32,11 +32,13 @@ import android.util.Size;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private String[] permissionManifest = {
@@ -53,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private CaptureRequest.Builder mPreviewBuilder;
     private ImageReader mImageReader;
 
-    public int svWidth = 1280;
-    public int svHeight = 720;
+    public int svWidth = 640;
+    public int svHeight = 360;
 
     private boolean isEncode;
 
@@ -71,16 +73,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     v.setTag(1);
                     String basePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/";
                     String fileName = "test.mp4";
-                    File mp4file = new File(basePath + fileName);
-                    if (mp4file.exists()) {
-                        mp4file.delete();
-                    }
-                    FFMPEGControl.prepareEncode(basePath, fileName, 1, svWidth, svHeight, svWidth, svHeight, 20, 400000);
+                    FFMPEGControl.prepareEncode(basePath, fileName, svWidth, svHeight, svWidth, svHeight, 20, 400000);
                     btn.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             isEncode = false;
                             FFMPEGControl.encodeFlagEnd();
+                            Log.e("encodeFlagEnd", "run-------------------------------------------------------------");
                         }
                     }, 5000);
 
@@ -90,6 +89,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         });
 
         surfaceView = findViewById(R.id.sv);
+        ViewGroup.LayoutParams params = surfaceView.getLayoutParams();
+        params.width = getResources().getDisplayMetrics().widthPixels / 2;
+        params.height = getResources().getDisplayMetrics().widthPixels * svWidth / svHeight / 2;
         surfaceView.getHolder().addCallback(this);
 
     }
@@ -109,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             e.printStackTrace();
         }
     }
-
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -160,7 +161,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
 
     private CameraDevice.StateCallback mCameraDeviceStateCallback = new CameraDevice.StateCallback() {
-
         @Override
         public void onOpened(CameraDevice camera) {
             try {
@@ -172,12 +172,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         @Override
         public void onDisconnected(CameraDevice camera) {
-
+            camera.close();
         }
 
         @Override
         public void onError(CameraDevice camera, int error) {
-
+            camera.close();
         }
     };
 
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             //在这里可以通过CameraCharacteristics设置相机的功能,当然必须检查是否支持
             characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
             //就像这样
-            mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
 
             StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             //获取所有可用的预览尺寸
@@ -199,20 +199,16 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 Log.e("Size", "startPreview: " + s.getWidth() + "   " + s.getHeight());
             }
 
-            surfaceView.post(new Runnable() {
-                public void run() {
-                    surfaceView.getHolder().setFixedSize(svWidth, svHeight);
-                }
-            });
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
 
         //      就是在这里，通过这个set(key,value)方法，设置曝光啊，自动聚焦等参数！！ 如下举例：
-        mPreviewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-        mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+//        mPreviewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+//        mPreviewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+        mPreviewBuilder.set(CaptureRequest.JPEG_ORIENTATION, 90);
 
-        mImageReader = ImageReader.newInstance(svWidth, svHeight, ImageFormat.YV12/*此处还有很多格式，比如我所用到YUV等*/, 2/*最大的图片数，mImageReader里能获取到图片数，但是实际中是2+1张图片，就是多一张*/);
+        mImageReader = ImageReader.newInstance(svWidth, svHeight, ImageFormat.YUV_420_888/*此处还有很多格式，比如我所用到YUV等*/, 2/*最大的图片数，mImageReader里能获取到图片数，但是实际中是2+1张图片，就是多一张*/);
 
         mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mHandler);
         // 这里一定分别add两个surface，一个Textureview的，一个ImageReader的，如果没add，会造成没摄像头预览，或者没有ImageReader的那个回调！！
@@ -251,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
          **/
         @Override
         public void onImageAvailable(ImageReader reader) {
-            Image img = reader.acquireNextImage();
+            final Image img = reader.acquireNextImage();
             if (img == null) {
                 return;
             }
@@ -266,8 +262,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
                 byte[] yuvs = new byte[ySize + uSize + vSize];
                 yBuffer.get(yuvs, 0, ySize);
-                vBuffer.get(yuvs, ySize, uSize);
-                uBuffer.get(yuvs, ySize + uSize, vSize);
+                vBuffer.get(yuvs, ySize, vSize);
+                uBuffer.get(yuvs, ySize + vSize, uSize);
 
                 FFMPEGControl.putOneFrame(yuvs);
             }
@@ -298,4 +294,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //            }
 //        }.start();
     }
+
+
 }

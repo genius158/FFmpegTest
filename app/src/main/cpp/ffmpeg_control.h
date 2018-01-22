@@ -42,6 +42,8 @@ private:
 
     int is_end;
 
+private:
+    static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl);
 
 public:
     void encodeFlagEnd();
@@ -52,10 +54,7 @@ public:
 
     static void *h264ToMp4(void *obj);
 
-    static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl);
-
-    int prepareEncode(char *mediaBasePath_, char *mediaName_,
-                      int filter, int inWidth,
+    int prepareEncode(char *mediaBasePath_, char *mediaName_, int inWidth,
                       int inHeight, int outWidth, int outHeight,
                       int frameRate, long bitRate);
 

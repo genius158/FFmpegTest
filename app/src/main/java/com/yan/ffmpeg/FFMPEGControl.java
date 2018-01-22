@@ -35,10 +35,10 @@ public class FFMPEGControl {
 
     public static native int addOverlay(String videoPath, String impPath, String outputPath);
 
-    public static native int videoEncodeTest(String input,String output,String mp4File);
+    public static native int videoEncodeTest(String input, String output, String mp4File);
 
     // -------------------------- line --------------------------
-    public static native int prepareEncode(String mediaBasePath,String mediaName, int filter,int inWidth, int inHeight, int outWidth, int  outHeight, int frameRate, long bitRate);
+    public static native int prepareEncode(String mediaBasePath, String mediaName, int inWidth, int inHeight, int outWidth, int outHeight, int frameRate, long bitRate);
 
     public static native void putOneFrame(byte[] data);
 

@@ -25,9 +25,8 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_yan_ffmpeg_FFMPEGControl_prepareEncode(JNIEnv *env, jobject instance,
                                                 jstring mediaBasePath_, jstring mediaName_,
-                                                jint filter, jint inWidth,
-                                                jint inHeight, jint outWidth, jint outHeight,
-                                                jint frameRate, jlong bitRate) {
+                                                jint inWidth, jint inHeight, jint outWidth,
+                                                jint outHeight, jint frameRate, jlong bitRate) {
 
     const char *bp = env->GetStringUTFChars(mediaBasePath_, 0);
     char *media_base_path = (char *) malloc(strlen(bp) + 1);
@@ -37,8 +36,7 @@ Java_com_yan_ffmpeg_FFMPEGControl_prepareEncode(JNIEnv *env, jobject instance,
     strcpy(media_name, n);
 
     ffMpegControl = new FFMpegControl();
-    int ret = ffMpegControl->prepareEncode(media_base_path, media_name, filter, inWidth, inHeight,
-                                           outWidth,
+    int ret = ffMpegControl->prepareEncode(media_base_path, media_name, inWidth, inHeight, outWidth,
                                            outHeight, frameRate, bitRate);
 
     env->ReleaseStringUTFChars(mediaBasePath_, bp);

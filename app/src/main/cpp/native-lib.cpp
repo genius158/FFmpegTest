@@ -217,7 +217,7 @@ Java_com_yan_ffmpeg_FFMPEGControl_addOverlay(JNIEnv *env, jobject instance, jstr
     for (int i = 0; i < size; i++) {
         LOGE("args ----- %s", args[i]);
     }
-    jxRun(size, args);
+    ffmpeg_run(size, args);
     return 0;
 }
 
@@ -231,7 +231,7 @@ Java_com_yan_ffmpeg_FFMPEGControl_ffmpegRun(JNIEnv *env, jobject instance, jobje
         jstring js = (jstring) env->GetObjectArrayElement(commends, i);
         argv[i] = (char *) env->GetStringUTFChars(js, 0);
     }
-    return jxRun(argc, argv);
+    return ffmpeg_run(argc, argv);
 }
 
 //--------------------------------------- line ---------------------------------------
@@ -453,7 +453,7 @@ Java_com_yan_ffmpeg_FFMPEGControl_videoEncodeTest(JNIEnv *env, jobject instance,
         LOGE("%s", cmd[i]);
     }
 
-    jxRun(4, cmd);
+    ffmpeg_run(4, cmd);
     LOGE("ffmpegmain end");
     env->ReleaseStringUTFChars(input_, inputurl_str);
     env->ReleaseStringUTFChars(output_, outputurl_str);

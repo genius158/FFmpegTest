@@ -4582,7 +4582,7 @@ static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
     LOGE("ffmpeg-system-log: %s", line);
 }
 
-int jxRun(int argc, char **argv) {
+int ffmpeg_run(int argc, char **argv) {
 
     LOGE("命令开始");
     av_log(NULL, AV_LOG_WARNING, " 命令开始");

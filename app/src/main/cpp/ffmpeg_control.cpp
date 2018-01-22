@@ -94,17 +94,15 @@ void *FFMpegControl::h264ToMp4(void *obj) {
     avio_close(fmc->pFormatCtx->pb);
     avformat_free_context(fmc->pFormatCtx);
 
+    remove(fmc->media_full_name);
+
     char *cmd[4];
     cmd[0] = "ffmpeg";
     cmd[1] = "-i";
     cmd[2] = fmc->temp_h264_path;
     cmd[3] = fmc->media_full_name;
 
-    for (int i = 0; i < 4; ++i) {
-        LOGE("%s", cmd[i]);
-    }
-
-    jxRun(4, cmd);
+    ffmpeg_run(4, cmd);
     LOGE("mp4 encode finish !!!!!!");
 
     free(fmc->media_base_path);
@@ -115,23 +113,8 @@ void *FFMpegControl::h264ToMp4(void *obj) {
     return 0;
 }
 
-void FFMpegControl::log_callback_null(void *ptr, int level, const char *fmt, va_list vl) {
-    static int print_prefix = 1;
-    static int count;
-    static char prev[1024];
-    char line[1024];
-    static int is_atty;
-
-    av_log_format_line(ptr, level, fmt, vl, line, sizeof(line), &print_prefix);
-
-    strcpy(prev, line);
-    LOGE("ffmpeg-system-log: %s", line);
-}
-
-int FFMpegControl::prepareEncode(char *mediaBasePath, char *mediaName,
-                                 int filter, int inWidth,
-                                 int inHeight, int outWidth, int outHeight,
-                                 int frameRate, long bitRate) {
+int FFMpegControl::prepareEncode(char *mediaBasePath, char *mediaName, int inWidth, int inHeight,
+                                 int outWidth, int outHeight, int frameRate, long bitRate) {
 //    av_log_set_callback(log_callback_null);
     media_base_path = mediaBasePath;
     media_name = mediaName;
@@ -230,11 +213,9 @@ int FFMpegControl::prepareEncode(char *mediaBasePath, char *mediaName,
         return -1;
     }
 
-
     pFrame = av_frame_alloc();
     picture_size = av_image_get_buffer_size(pCodecCtx->pix_fmt, pCodecCtx->width,
-                                            pCodecCtx->height,
-                                            1);
+                                            pCodecCtx->height, 1);
     uint8_t *buf = (uint8_t *) av_malloc(picture_size);
     av_image_fill_arrays(pFrame->data, pFrame->linesize, buf,
                          pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height, 1);
@@ -252,4 +233,17 @@ int FFMpegControl::prepareEncode(char *mediaBasePath, char *mediaName,
 
 int FFMpegControl::getYUVSize() {
     return in_h * in_w;
+}
+
+void FFMpegControl::log_callback_null(void *ptr, int level, const char *fmt, va_list vl) {
+    static int print_prefix = 1;
+    static int count;
+    static char prev[1024];
+    char line[1024];
+    static int is_atty;
+
+    av_log_format_line(ptr, level, fmt, vl, line, sizeof(line), &print_prefix);
+
+    strcpy(prev, line);
+    LOGE("ffmpeg-system-log: %s", line);
 }
